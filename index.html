@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog of Xie</title>
+    <title>滚动高度限制布局</title>
     <style>
         * {
             margin: 0;
@@ -52,6 +52,7 @@
             flex-grow: 1;
         }
         
+        /* 内容样式 */
         .content {
             background-color: rgba(234, 248, 214, 0.95);
             /* border-radius: 20px 20px 0 0; */
@@ -111,13 +112,41 @@
             color: #444;
         }
 
+        .container {
+            display: flex;
+            margin: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .image-section {
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        .image-section img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .text-section {
+            flex: 1;
+        }
+
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+
     </style>
 </head>
 <body>
+    <!-- 背景容器 -->
     <div class="background-container">
         <img src="https://picsum.photos/1920/1080" alt="pagebackeground" class="background-image">
     </div>
     
+    <!-- 页面内容容器 -->
     <div class="page-container">
         <div class="top-spacer"></div>
             <div class="seperation">
@@ -130,27 +159,84 @@
                     </div>
                 </div>
         </div>
-        
         <div class="content-wrapper">
             <div class="sidecolumn"></div>
             <div class="content">
                 <h1>Hello!</h1>
-                <p>这是一些示例文本...</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.</p>
+                <div id="content"></div>
             </div>
             <div class="sidecolumn"></div>
         </div>
     </div>
 
     <script>
+        async function loadFiles() {
+            try {
+                // 1. 获取文件列表
+                const [textData, imageData, htmlData] = await Promise.all([
+                    fetch('BlogContents/filelist.json').then(r => r.json()),
+                    fetch('images/BlogImages/filelist.json').then(r => r.json()),
+                    fetch('BlogPages/filelist.json').then(r => r.json())
+                ]);
+                const textFiles = textData.files;
+                const imageFiles = imageData.files;
+                const htmlFiles = htmlData.files;
+
+                // 2. 动态创建内容
+                const contentDiv = document.getElementById('content');
+                for (let i = 0; i < textFiles.length; i++) {
+                    const container = document.createElement('div');
+                    container.className = 'container';
+
+                    // 图片部分
+                    const imageSection = document.createElement('div');
+                    imageSection.className = 'image-section';
+                    const img = document.createElement('img');
+                    img.src = `images/BlogImages/${imageFiles[i]}`; // 自动定位图片
+                    imageSection.appendChild(img);
+
+                    // 文本部分
+                    const textSection = document.createElement('div');
+                    textSection.className = 'text-section';
+                    const textContent = document.createElement('p');
+                    // 获取文本并截取前100字符
+                    const fullText = await fetch(`BlogContents/${textFiles[i]}`)
+                    .then(r => r.text())
+                    .catch(error => console.error('加载失败:', error));
+                    // 截取文本并添加省略号
+                    const maxLength = 50;
+                    textContent.textContent = fullText.length > maxLength 
+                        ? fullText.substring(0, maxLength) + '...' 
+                        : fullText;
+      
+                    // 跳转链接
+                    const link = document.createElement('a');
+                    link.href = `BlogPages/${htmlFiles[i]}`; // 自动定位HTML页面
+                    link.textContent = "阅读全文";
+      
+                    // 组合元素
+                    textSection.appendChild(textContent);
+                    textSection.appendChild(link);
+                    container.appendChild(imageSection);
+                    container.appendChild(textSection);
+                    contentDiv.appendChild(container);
+                    }
+            } catch (error) {
+                    console.error("加载失败:", error);
+            }
+        }
+
+        async function fetchFileList(folder) {
+            const response = await fetch(`${folder}filelist.json`);
+            return await response.json();
+        }
+
+        async function fetchTextContent(filePath) {
+            const response = await fetch(filePath);
+            return await response.text();
+        }
+
+        loadFiles();
     </script>
 </body>
 </html>
