@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>滚动高度限制布局</title>
+    <title>Blog of Xie</title>
     <style>
         * {
             margin: 0;
@@ -56,7 +56,7 @@
         .content {
             background-color: rgba(234, 248, 214, 0.95);
             /* border-radius: 20px 20px 0 0; */
-            padding: 25px;
+            padding: 10px;
             /* box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1); */
         }
         
@@ -104,6 +104,7 @@
         h1 {
             margin-bottom: 20px;
             color: #333;
+            text-align: center;
         }
         
         p {
@@ -114,23 +115,27 @@
 
         .container {
             display: flex;
-            margin: 10px;
-            border: 1px solid #ccc;
-            padding: 10px;
+            margin: 5px;
+            border: 3px solid #ccc;
+            padding: 5px;
+            max-height: 30vh;
         }
 
         .image-section {
-            width: 200px;
+            width: 25vh;
             margin-right: 10px;
         }
 
         .image-section img {
-            max-width: 100%;
+            width: 100%;
             height: auto;
         }
 
         .text-section {
             flex: 1;
+            max-height: 40vh;
+            overflow: auto;
+            white-space: pre-wrap;
         }
 
         a {
@@ -212,14 +217,13 @@
                     // 跳转链接
                     const link = document.createElement('a');
                     link.href = `BlogPages/${htmlFiles[i]}`; // 自动定位HTML页面
-                    link.textContent = "阅读全文";
-      
-                    // 组合元素
+                    link.textContent = "";
+
                     textSection.appendChild(textContent);
-                    textSection.appendChild(link);
                     container.appendChild(imageSection);
                     container.appendChild(textSection);
-                    contentDiv.appendChild(container);
+                    link.appendChild(container);
+                    contentDiv.appendChild(link);
                     }
             } catch (error) {
                     console.error("加载失败:", error);
